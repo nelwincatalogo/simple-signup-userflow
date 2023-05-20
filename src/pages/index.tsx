@@ -1,9 +1,26 @@
+/* eslint-disable @next/next/no-img-element */
 import type { NextPage } from 'next';
-import { useAlert } from 'react-alert';
 import Head from 'next/head';
+import { motion, useAnimate, useInView, animate } from 'framer-motion';
+import { useEffect } from 'react';
+import Typewriter from 'typewriter-effect';
+
+type AnimationSequence = Parameters<typeof animate>[0];
 
 const Home: NextPage = () => {
-  const alert = useAlert();
+  const [scope, animate] = useAnimate();
+  const isInView = useInView(scope);
+
+  useEffect(() => {
+    if (isInView) {
+      const sequence: AnimationSequence = [
+        ['img', { opacity: 1 }, { duration: 6 }],
+        ['img', { y: -150, scale: [1, 0.5] }, { duration: 1, at: '-4' }],
+        ['.writer', { opacity: 1 }, { at: '+1.5' }],
+      ];
+      animate(sequence);
+    }
+  }, [isInView]);
 
   return (
     <div className="font-inter">
@@ -14,16 +31,43 @@ const Home: NextPage = () => {
       </Head>
 
       <main>
-        <div className="text-red-500 font-bold">Hello World</div>
-        <button
-          onClick={() => {
-            alert.success('Yeyyy!');
-            alert.error('Yeyyy!');
-            alert.info('Yeyyy!');
-          }}
+        <div
+          ref={scope}
+          className="h-screen flex flex-col justify-center items-center relative"
         >
-          Alert
-        </button>
+          <img
+            className="w-[12rem] h-[12rem] rounded-full mx-auto opacity-0"
+            src="https://images.unsplash.com/photo-1529665253569-6d01c0eaf7b6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=785&q=80"
+            alt=""
+          />
+          <div className="writer absolute top-[16rem] opacity-0 text-4xl font-bold text-slate-600">
+            <Typewriter
+              options={{ loop: false }}
+              onInit={(typewriter) => {
+                setTimeout(function () {
+                  typewriter
+                    .typeString('Hello World!')
+                    .callFunction(() => {
+                      console.log('String typed out!');
+                      animate([
+                        [
+                          '.continue',
+                          { opacity: 1, y: -20 },
+                          { duration: 2, delay: 1 },
+                        ],
+                      ]);
+                    })
+                    .start();
+                }, 5000);
+              }}
+            />
+          </div>
+          <div className="opacity-0 continue absolute top-[22rem]">
+            <button className="bg-blue-500 px-4 py-3 rounded-md text-white hover:bg-blue-600 active:scale-95">
+              click to continue
+            </button>
+          </div>
+        </div>
       </main>
     </div>
   );
